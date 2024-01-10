@@ -17,16 +17,19 @@ func (c *cognitoClient) GetUserToken(username, password string) (*domain.UserTok
 
 	if ok {
 		if userToken.Expiration.After(time.Now()) {
+			fmt.Println("use cached token")
 			return userToken, nil
 		}
+
+		c.deleteUserToken(username)
 
 		// トークンが期限切れの場合は、リフレッシュトークンを使用して新しいトークンを取得する
 		userToken, err := c.getRefreshTokenAuth(username, userToken.RefreshToken)
 		if err != nil {
-			// ログだけ出して getUserSRPAuth で新しいトークンを取得する
+			// ログだけ出して getUserPasswordAuth で新しいトークンを取得する
 			fmt.Printf("refresh token error: %v\n", err)
-			c.deleteUserToken(username)
 		} else {
+			fmt.Println("use refresh token")
 			c.setUserToken(username, userToken)
 
 			return userToken, nil
@@ -40,6 +43,7 @@ func (c *cognitoClient) GetUserToken(username, password string) (*domain.UserTok
 	if userToken == nil {
 		return nil, fmt.Errorf("cat not fetch token")
 	}
+	fmt.Println("use new token")
 
 	c.setUserToken(username, userToken)
 
