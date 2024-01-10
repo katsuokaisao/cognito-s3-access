@@ -4,11 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/katsuokaisao/cognito-s3-access-study/cognito"
 	"github.com/katsuokaisao/cognito-s3-access-study/s3"
 )
 
 func main() {
+	if err := godotenv.Load(".env"); err != nil {
+		panic("読み込み出来ませんでした")
+	}
+
 	region := os.Getenv("COGNITO_REGION")
 	accountID := os.Getenv("COGNITO_ACCOUNT_ID")
 	poolID := os.Getenv("COGNITO_POOL_ID")
