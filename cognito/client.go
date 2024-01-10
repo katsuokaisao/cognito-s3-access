@@ -2,18 +2,14 @@ package cognito
 
 import (
 	"sync"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cognitoidentity"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/katsuokaisao/cognito-s3-access-study/domain"
+	"github.com/katsuokaisao/cognito-s3-access-study/repository"
 )
-
-type CognitoClient interface {
-	GetUserToken(username, password string) (*UserToken, error)
-	GetCredentials(idToken string) (*Credential, error)
-}
 
 type cognitoClient struct {
 	provider *cognitoidentityprovider.CognitoIdentityProvider
@@ -26,25 +22,11 @@ type cognitoClient struct {
 	clientSecret string
 
 	mu            sync.RWMutex
-	userTokenMap  map[string]*UserToken
-	credentialMap map[string]*Credential
+	userTokenMap  map[string]*domain.UserToken
+	credentialMap map[string]*domain.Credential
 }
 
-type UserToken struct {
-	AccessToken  string
-	IDToken      string
-	RefreshToken string
-	Expiration   time.Time
-}
-
-type Credential struct {
-	AccessKeyID  string
-	SecretKey    string
-	SessionToken string
-	Expiration   time.Time
-}
-
-func NewCognitoClient(region, accountID, poolID, clientID, client_secret string) CognitoClient {
+func NewCognitoClient(region, accountID, poolID, clientID, client_secret string) repository.CognitoClient {
 	provider := cognitoidentityprovider.New(
 		session.Must(
 			session.NewSession(
@@ -73,12 +55,12 @@ func NewCognitoClient(region, accountID, poolID, clientID, client_secret string)
 		poolID:        poolID,
 		clientID:      clientID,
 		clientSecret:  client_secret,
-		userTokenMap:  make(map[string]*UserToken),
-		credentialMap: make(map[string]*Credential),
+		userTokenMap:  make(map[string]*domain.UserToken),
+		credentialMap: make(map[string]*domain.Credential),
 	}
 }
 
-func (c *cognitoClient) getUserTokenFromMap(username string) (*UserToken, bool) {
+func (c *cognitoClient) getUserTokenFromMap(username string) (*domain.UserToken, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -86,7 +68,7 @@ func (c *cognitoClient) getUserTokenFromMap(username string) (*UserToken, bool) 
 	return userToken, ok
 }
 
-func (c *cognitoClient) setUserToken(username string, userToken *UserToken) {
+func (c *cognitoClient) setUserToken(username string, userToken *domain.UserToken) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -100,7 +82,7 @@ func (c *cognitoClient) deleteUserToken(username string) {
 	delete(c.userTokenMap, username)
 }
 
-func (c *cognitoClient) getCredentialFromMap(idToken string) (*Credential, bool) {
+func (c *cognitoClient) getCredentialFromMap(idToken string) (*domain.Credential, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
@@ -108,7 +90,7 @@ func (c *cognitoClient) getCredentialFromMap(idToken string) (*Credential, bool)
 	return credential, ok
 }
 
-func (c *cognitoClient) setCredential(idToken string, credential *Credential) {
+func (c *cognitoClient) setCredential(idToken string, credential *domain.Credential) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 

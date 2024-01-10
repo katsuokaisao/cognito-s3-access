@@ -9,9 +9,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
+	"github.com/katsuokaisao/cognito-s3-access-study/domain"
 )
 
-func (c *cognitoClient) GetUserToken(username, password string) (*UserToken, error) {
+func (c *cognitoClient) GetUserToken(username, password string) (*domain.UserToken, error) {
 	userToken, ok := c.getUserTokenFromMap(username)
 
 	if ok {
@@ -24,7 +25,7 @@ func (c *cognitoClient) GetUserToken(username, password string) (*UserToken, err
 		if err != nil {
 			// ログだけ出して getUserSRPAuth で新しいトークンを取得する
 			fmt.Printf("refresh token error: %v\n", err)
-			c.deleteCredential(username)
+			c.deleteUserToken(username)
 		} else {
 			c.setUserToken(username, userToken)
 
@@ -45,7 +46,7 @@ func (c *cognitoClient) GetUserToken(username, password string) (*UserToken, err
 	return userToken, nil
 }
 
-func (c *cognitoClient) getUserPasswordAuth(username, password string) (*UserToken, error) {
+func (c *cognitoClient) getUserPasswordAuth(username, password string) (*domain.UserToken, error) {
 	authOutput, err := c.userPasswordAuth(username, password)
 	if err != nil {
 		return nil, fmt.Errorf("user srp auth error: %v", err)
@@ -60,7 +61,7 @@ func (c *cognitoClient) getUserPasswordAuth(username, password string) (*UserTok
 			return nil, fmt.Errorf("token is nil")
 		}
 
-		return &UserToken{
+		return &domain.UserToken{
 			AccessToken:  *authOutput.AuthenticationResult.AccessToken,
 			IDToken:      *authOutput.AuthenticationResult.IdToken,
 			RefreshToken: *authOutput.AuthenticationResult.RefreshToken,
@@ -96,7 +97,7 @@ func (c *cognitoClient) getUserPasswordAuth(username, password string) (*UserTok
 		return nil, fmt.Errorf("challenge success but token is nil")
 	}
 
-	return &UserToken{
+	return &domain.UserToken{
 		AccessToken:  *challengeOutPut.AuthenticationResult.AccessToken,
 		IDToken:      *challengeOutPut.AuthenticationResult.IdToken,
 		RefreshToken: *challengeOutPut.AuthenticationResult.RefreshToken,
@@ -104,7 +105,7 @@ func (c *cognitoClient) getUserPasswordAuth(username, password string) (*UserTok
 	}, nil
 }
 
-func (c *cognitoClient) getRefreshTokenAuth(username, refreshToken string) (*UserToken, error) {
+func (c *cognitoClient) getRefreshTokenAuth(username, refreshToken string) (*domain.UserToken, error) {
 	authOutput, err := c.refreshTokenAuth(username, refreshToken)
 	if err != nil {
 		return nil, err
@@ -118,7 +119,7 @@ func (c *cognitoClient) getRefreshTokenAuth(username, refreshToken string) (*Use
 		return nil, fmt.Errorf("token is nil")
 	}
 
-	return &UserToken{
+	return &domain.UserToken{
 		AccessToken:  *authOutput.AuthenticationResult.AccessToken,
 		IDToken:      *authOutput.AuthenticationResult.IdToken,
 		RefreshToken: *authOutput.AuthenticationResult.RefreshToken,

@@ -8,18 +8,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/katsuokaisao/cognito-s3-access-study/repository"
 )
-
-type S3Client interface {
-	HeadBucket(bucket string) error
-	DownloadObject(bucket, key string) (string, error)
-}
 
 type s3Client struct {
 	downloader *s3manager.Downloader
 }
 
-func NewS3Client(id, secret, token string) S3Client {
+func NewS3Client(id, secret, token string) repository.S3Client {
 	sess := session.Must(session.NewSession(
 		&aws.Config{
 			Credentials: credentials.NewStaticCredentials(

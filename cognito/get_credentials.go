@@ -6,9 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cognitoidentity"
+	"github.com/katsuokaisao/cognito-s3-access-study/domain"
 )
 
-func (c *cognitoClient) GetCredentials(idToken string) (*Credential, error) {
+func (c *cognitoClient) GetCredentials(idToken string) (*domain.Credential, error) {
 	credential, ok := c.getCredentialFromMap(idToken)
 	if ok {
 		if credential.Expiration.After(time.Now()) {
@@ -28,7 +29,7 @@ func (c *cognitoClient) GetCredentials(idToken string) (*Credential, error) {
 		return nil, err
 	}
 
-	credential = &Credential{
+	credential = &domain.Credential{
 		AccessKeyID:  *getCredentialsForIdentityOutput.Credentials.AccessKeyId,
 		SecretKey:    *getCredentialsForIdentityOutput.Credentials.SecretKey,
 		SessionToken: *getCredentialsForIdentityOutput.Credentials.SessionToken,
