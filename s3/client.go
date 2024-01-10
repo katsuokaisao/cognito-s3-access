@@ -15,9 +15,10 @@ type s3Client struct {
 	downloader *s3manager.Downloader
 }
 
-func NewS3Client(id, secret, token string) repository.S3Client {
+func NewS3Client(id, secret, token, region string) repository.S3Client {
 	sess := session.Must(session.NewSession(
 		&aws.Config{
+			Region: aws.String(region),
 			Credentials: credentials.NewStaticCredentials(
 				id,
 				secret,

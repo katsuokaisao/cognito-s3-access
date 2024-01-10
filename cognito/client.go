@@ -17,7 +17,8 @@ type cognitoClient struct {
 
 	accountID    string
 	region       string
-	poolID       string
+	userPoolID   string
+	idPoolID     string
 	clientID     string
 	clientSecret string
 
@@ -26,7 +27,7 @@ type cognitoClient struct {
 	credentialMap map[string]*domain.Credential
 }
 
-func NewCognitoClient(region, accountID, poolID, clientID, client_secret string) repository.CognitoClient {
+func NewCognitoClient(region, accountID, userPoolID, idPoolID, clientID, client_secret string) repository.CognitoClient {
 	provider := cognitoidentityprovider.New(
 		session.Must(
 			session.NewSession(
@@ -52,7 +53,8 @@ func NewCognitoClient(region, accountID, poolID, clientID, client_secret string)
 		identity:      identity,
 		accountID:     accountID,
 		region:        region,
-		poolID:        poolID,
+		userPoolID:    userPoolID,
+		idPoolID:      idPoolID,
 		clientID:      clientID,
 		clientSecret:  client_secret,
 		userTokenMap:  make(map[string]*domain.UserToken),

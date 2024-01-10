@@ -16,7 +16,8 @@ func main() {
 
 	region := os.Getenv("COGNITO_REGION")
 	accountID := os.Getenv("COGNITO_ACCOUNT_ID")
-	poolID := os.Getenv("COGNITO_POOL_ID")
+	userPoolID := os.Getenv("COGNITO_USER_POOL_ID")
+	idPoolID := os.Getenv("COGNITO_ID_POOL_ID")
 	clientID := os.Getenv("COGNITO_CLIENT_ID")
 	clientSecret := os.Getenv("COGNITO_CLIENT_SECRET")
 
@@ -26,25 +27,28 @@ func main() {
 	bucket := os.Getenv("S3_BUCKET")
 	objectKey := os.Getenv("S3_OBJECT_KEY")
 
-	client := cognito.NewCognitoClient(region, accountID, poolID, clientID, clientSecret)
+	client := cognito.NewCognitoClient(region, accountID, userPoolID, idPoolID, clientID, clientSecret)
 	userToken, err := client.GetUserToken(username, password)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("get user token success")
 
 	credential, err := client.GetCredentials(userToken.IDToken)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("get credential success")
 
-	s3Client := s3.NewS3Client(credential.AccessKeyID, credential.SecretKey, credential.SessionToken)
+	s3Client := s3.NewS3Client(credential.AccessKeyID, credential.SecretKey, credential.SessionToken, region)
 	if err = s3Client.HeadBucket(bucket); err != nil {
-		panic(err)
+		panic(fmt.Errorf("head bucket error: %v", err))
 	}
+	fmt.Println("head bucket success")
 
 	data, err := s3Client.DownloadObject(bucket, objectKey)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("download object error: %v", err))
 	}
 
 	fmt.Printf("s3 data: %s\n", data)

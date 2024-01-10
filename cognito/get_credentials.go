@@ -44,9 +44,9 @@ func (c *cognitoClient) GetCredentials(idToken string) (*domain.Credential, erro
 func (c *cognitoClient) getID(idToken string) (string, error) {
 	input := &cognitoidentity.GetIdInput{}
 	input.SetAccountId(c.accountID)
-	input.SetIdentityPoolId(c.poolID)
+	input.SetIdentityPoolId(c.idPoolID)
 	input.SetLogins(map[string]*string{
-		fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", c.region, c.poolID): aws.String(idToken),
+		fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", c.region, c.userPoolID): aws.String(idToken),
 	})
 
 	getIDOutput, err := c.identity.GetId(input)
@@ -64,7 +64,7 @@ func (c *cognitoClient) getCredentialsForIdentity(identityID, idToken string) (*
 	input := &cognitoidentity.GetCredentialsForIdentityInput{}
 	input.SetIdentityId(identityID)
 	input.SetLogins(map[string]*string{
-		fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", c.region, c.poolID): aws.String(idToken),
+		fmt.Sprintf("cognito-idp.%s.amazonaws.com/%s", c.region, c.userPoolID): aws.String(idToken),
 	})
 
 	getCredentialsForIdentityOutput, err := c.identity.GetCredentialsForIdentity(input)

@@ -45,7 +45,14 @@ resource "aws_iam_policy" "cognito_auth_iam_policy" {
     Statement = [
       {
         Action = [
-          "S3:GetObject",
+          "s3:ListBucket",
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:s3:::${var.bucket_name}"
+      },
+      {
+        Action = [
+          "s3:GetObject",
         ]
         Effect   = "Allow"
         Resource = "arn:aws:s3:::${var.bucket_name}/*"
