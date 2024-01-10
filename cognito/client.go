@@ -66,13 +66,15 @@ func NewCognitoClient(region, accountID, poolID, clientID, client_secret string)
 	)
 
 	return &cognitoClient{
-		provider:     provider,
-		identity:     identity,
-		accountID:    accountID,
-		region:       region,
-		poolID:       poolID,
-		clientID:     clientID,
-		clientSecret: client_secret,
+		provider:      provider,
+		identity:      identity,
+		accountID:     accountID,
+		region:        region,
+		poolID:        poolID,
+		clientID:      clientID,
+		clientSecret:  client_secret,
+		userTokenMap:  make(map[string]*UserToken),
+		credentialMap: make(map[string]*Credential),
 	}
 }
 
