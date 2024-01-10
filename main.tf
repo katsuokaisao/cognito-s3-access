@@ -1,3 +1,6 @@
+variable "cognito_identity_pool_id" {}
+variable "bucket_name" {}
+
 terraform {
   required_providers {
     aws = {
@@ -23,7 +26,7 @@ resource "aws_iam_role" "cognito_auth_iam_role" {
         Effect = "Allow"
         Condition = {
           StringEquals = {
-            "cognito-identity.amazonaws.com:aud" = "xxx"
+            "cognito-identity.amazonaws.com:aud" = var.cognito_identity_pool_id
           }
           "ForAnyValue:StringLike" = {
             "cognito-identity.amazonaws.com:amr" = "authenticated"
@@ -42,10 +45,10 @@ resource "aws_iam_policy" "cognito_auth_iam_policy" {
     Statement = [
       {
         Action = [
-            "S3:GetObject",
+          "S3:GetObject",
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:s3:::gtfs-rt/*"
+        Resource = "arn:aws:s3:::${var.bucket_name}/*"
       },
     ]
   })
@@ -57,5 +60,5 @@ resource "aws_iam_role_policy_attachment" "cognito_auth_iam_role_policy_attachme
 }
 
 resource "aws_s3_bucket" "gtfs_rt_bucket" {
-  bucket = "gtfs-rt"
+  bucket = var.bucket_name
 }
