@@ -78,7 +78,7 @@ func NewCognitoClient(region, accountID, poolID, clientID, client_secret string)
 
 func (c *cognitoClient) getUserTokenFromMap(username string) (*UserToken, bool) {
 	c.mu.RLock()
-	defer c.mu.Unlock()
+	defer c.mu.RUnlock()
 
 	userToken, ok := c.userTokenMap[username]
 	return userToken, ok
@@ -100,7 +100,7 @@ func (c *cognitoClient) deleteUserToken(username string) {
 
 func (c *cognitoClient) getCredentialFromMap(idToken string) (*Credential, bool) {
 	c.mu.RLock()
-	defer c.mu.Unlock()
+	defer c.mu.RUnlock()
 
 	credential, ok := c.credentialMap[idToken]
 	return credential, ok
